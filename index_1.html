@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRC as Code — Jorge Hemmings G.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#132433;
+    --navy:#1F4E5F;
+    --bg:#EEF2F1;
+    --paper:#FFFFFF;
+    --ink:#1B2530;
+    --muted:#5B6B76;
+    --hair:#D8DFDD;
+    --gold:#C98A3E;
+    --pass:#2E7D5B;
+    --pass-bg:#E4F2EB;
+    --fail:#C0483F;
+    --fail-bg:#FBEAE7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0;}
+  a{color:var(--gold);}
+  .wrap{max-width:920px; margin:0 auto; padding:0 28px;}
+
+  header.hero{
+    background:var(--navy-deep);
+    color:#EAF0EE;
+    padding:64px 0 56px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:#8FB3A8;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:44px;
+    line-height:1.12;
+    font-weight:700;
+    max-width:680px;
+  }
+  .hero h1 span{color:var(--gold);}
+  .hero p.lede{
+    font-size:18px;
+    line-height:1.6;
+    color:#B9C7C3;
+    max-width:560px;
+    margin-top:20px;
+  }
+  .hero-meta{
+    margin-top:32px;
+    font-size:14px;
+    color:#8FB3A8;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 22px;
+  }
+  .hero-meta strong{color:#DCE9E5; font-weight:500;}
+  .disclaimer{
+    display:inline-block;
+    margin-top:26px;
+    font-size:13px;
+    color:#D9A96B;
+    border:1px solid #4A4326;
+    background:#241E10;
+    padding:6px 12px;
+    border-radius:3px;
+  }
+
+  .terminal{
+    margin-top:40px;
+    background:#0F1D28;
+    border:1px solid #23394A;
+    border-radius:8px;
+    overflow:hidden;
+    max-width:640px;
+  }
+  .term-bar{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:10px 14px;
+    background:#132433;
+    border-bottom:1px solid #23394A;
+  }
+  .term-dot{width:10px; height:10px; border-radius:50%;}
+  .term-bar span.fname{
+    margin-left:8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:#6F8A96;
+  }
+  .term-body{
+    padding:18px 20px 22px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    line-height:1.75;
+    color:#C9D6D2;
+    white-space:pre;
+    overflow-x:auto;
+  }
+  .term-body .cmd{color:#8FB3A8;}
+  .term-body .pass{color:#7FCBA1;}
+  .term-body .fail{color:#E38B84;}
+  .term-body .dim{color:#5C7581;}
+
+  section{padding:56px 0;}
+  section.alt{background:var(--paper); border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);}
+  .section-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:10px;
+  }
+  h2.section-title{font-size:26px; font-weight:700; margin-bottom:18px; color:var(--navy-deep);}
+  p{font-size:16px; line-height:1.7; color:var(--ink); max-width:640px;}
+  p.muted{color:var(--muted);}
+
+  .stack{display:flex; flex-direction:column; gap:34px;}
+  .toolrow{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:16px;
+    margin-top:24px;
+  }
+  .toolcard{
+    background:var(--paper);
+    border:1px solid var(--hair);
+    border-radius:6px;
+    padding:18px 20px;
+  }
+  .toolcard .tname{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:14px;
+    color:var(--navy-deep);
+    margin-bottom:6px;
+  }
+  .toolcard .trole{font-size:14px; color:var(--muted); line-height:1.5;}
+
+  .diffgrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:26px;
+    max-width:640px;
+  }
+  .diffcard{
+    border-radius:6px;
+    padding:20px 22px;
+    border:1px solid var(--hair);
+  }
+  .diffcard.before{background:var(--fail-bg); border-color:#EAC4BF;}
+  .diffcard.after{background:var(--pass-bg); border-color:#BEDBCB;}
+  .diffcard .dlabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:10px;
+  }
+  .diffcard.before .dlabel{color:var(--fail);}
+  .diffcard.after .dlabel{color:var(--pass);}
+  .diffcard .dnum{font-family:'Space Grotesk',sans-serif; font-size:38px; font-weight:700;}
+  .diffcard.before .dnum{color:var(--fail);}
+  .diffcard.after .dnum{color:var(--pass);}
+  .diffcard .dsub{font-size:13px; color:var(--muted); margin-top:4px;}
+
+  .lesson{
+    border-left:3px solid var(--gold);
+    padding:4px 0 4px 22px;
+    margin-top:26px;
+    max-width:600px;
+  }
+  .lesson p{font-size:15px; color:var(--muted);}
+
+  footer{
+    background:var(--navy-deep);
+    color:#B9C7C3;
+    padding:44px 0 52px;
+  }
+  footer .flinks{display:flex; flex-wrap:wrap; gap:26px; margin-top:18px;}
+  footer .flinks a{
+    color:#EAF0EE;
+    text-decoration:none;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    border-bottom:1px solid #3E5B54;
+    padding-bottom:2px;
+  }
+  footer .flinks a:hover{border-color:var(--gold); color:var(--gold);}
+  footer p{color:#7C9089; font-size:13px; max-width:600px;}
+
+  @media(max-width:640px){
+    .hero h1{font-size:32px;}
+    .diffgrid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">GRC as Code — portfolio project</div>
+    <h1>Controls that <span>enforce themselves</span>, not just get documented.</h1>
+    <p class="lede">Policy, compliance, and infrastructure controls for a hypothetical healthcare SaaS company — written as code, scanned automatically, and blocked in a live CI/CD pipeline.</p>
+    <div class="hero-meta">
+      <span><strong>Jorge Hemmings G.</strong></span>
+      <span>Information Security Officer</span>
+      <span>ISO 27001 Lead Auditor</span>
+    </div>
+    <div class="disclaimer">Meridian Health Analytics is a hypothetical company, built for portfolio demonstration purposes.</div>
+
+    <div class="terminal">
+      <div class="term-bar">
+        <div class="term-dot" style="background:#E4645B;"></div>
+        <div class="term-dot" style="background:#E5B95C;"></div>
+        <div class="term-dot" style="background:#59C271;"></div>
+        <span class="fname">checkov -f main.tf --compact</span>
+      </div>
+      <div class="term-body"><span class="cmd">$ checkov -f main.tf --compact</span>
+<span class="dim">terraform scan results</span>
+
+<span class="dim">before remediation</span>
+Passed checks: 4    <span class="fail">Failed checks: 7</span>
+
+<span class="dim">after remediation (encryption, public access, versioning, logging)</span>
+<span class="pass">Passed checks: 17</span>   Failed checks: 9*
+
+<span class="dim">* remaining failures: secondary logging bucket + non-critical hardening</span></div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">What this is</div>
+    <h2 class="section-title">From written policy to running pipeline</h2>
+    <p>Most GRC work lives in documents someone checks quarterly. This project takes controls that already exist as policy — MFA requirements, encryption standards, access review cadence — and expresses them as code that runs on every commit, catching violations before they ever reach production.</p>
+    <p class="muted">Built as a hands-on extension of a broader GRC portfolio: a risk register, a HIPAA / SOC 2 / PCI-DSS compliance mapping, and a NIST CSF / ISO 27001 gap analysis for the same hypothetical company.</p>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="section-label">Toolchain</div>
+    <h2 class="section-title">Four layers, one pipeline</h2>
+    <div class="toolrow">
+      <div class="toolcard">
+        <div class="tname">Open Policy Agent</div>
+        <div class="trole">Policy as code, written in Rego — evaluates account data against a written MFA rule.</div>
+      </div>
+      <div class="toolcard">
+        <div class="tname">Checkov + Terraform</div>
+        <div class="trole">Scans infrastructure-as-code for misconfigurations before anything is deployed.</div>
+      </div>
+      <div class="toolcard">
+        <div class="tname">GitHub Actions</div>
+        <div class="trole">Runs the scan automatically on every push and pull request against main.</div>
+      </div>
+      <div class="toolcard">
+        <div class="tname">Custom Rego policy</div>
+        <div class="trole">A Meridian-specific rule for PHI-tagged storage — and its documented limits.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-label">Result</div>
+    <h2 class="section-title">Before and after remediation</h2>
+    <p>Meridian's PHI storage bucket, scanned with Checkov, then remediated for public access, encryption, versioning, and logging.</p>
+    <div class="diffgrid">
+      <div class="diffcard before">
+        <div class="dlabel">Before</div>
+        <div class="dnum">4 / 11</div>
+        <div class="dsub">checks passed</div>
+      </div>
+      <div class="diffcard after">
+        <div class="dlabel">After</div>
+        <div class="dnum">17 / 26</div>
+        <div class="dsub">checks passed</div>
+      </div>
+    </div>
+    <div class="lesson">
+      <p>The remaining failures live in a secondary logging bucket added during the fix, not the original PHI-exposure risk — a reminder that triaging what actually matters is part of the job, not just running the scanner.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="section-label" style="color:#8FB3A8;">Verify it yourself</div>
+    <h2 style="font-size:20px; color:#EAF0EE; font-weight:700;">The pipeline runs in public — including a genuine failed run.</h2>
+    <div class="flinks">
+      <a href="https://github.com/jhemmings27/grc-as-code-portfolio">View repository ↗</a>
+      <a href="https://github.com/jhemmings27/grc-as-code-portfolio/actions">View pipeline runs ↗</a>
+      <a href="https://www.linkedin.com/in/jhemmings27">LinkedIn ↗</a>
+    </div>
+    <p style="margin-top:28px;">Meridian Health Analytics is a hypothetical company created for portfolio demonstration purposes. All findings and remediations shown are part of a self-directed learning project.</p>
+  </div>
+</footer>
+
+</body>
+</html>
