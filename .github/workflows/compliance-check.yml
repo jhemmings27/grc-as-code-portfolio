@@ -1,0 +1,32 @@
+# .github/workflows/compliance-check.yml
+#
+# This file tells GitHub: "every time someone pushes code or opens a
+# pull request, automatically run our compliance scan."
+
+name: Compliance Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  checkov-scan:
+    name: Run Checkov compliance scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Run Checkov against Terraform files
+        run: checkov -d . --compact

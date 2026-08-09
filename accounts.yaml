@@ -1,0 +1,16 @@
+# Meridian Health Analytics — Admin Account Inventory (hypothetical data)
+# This represents the "current state" a compliance check would evaluate.
+
+accounts:
+  - name: admin-internal-okta
+    mfa_enabled: true
+    type: internal
+  - name: admin-customer-portal
+    mfa_enabled: false
+    type: customer-facing
+  - name: admin-billing-console
+    mfa_enabled: false
+    type: customer-facing
+  - name: admin-support-tools
+    mfa_enabled: true
+    type: internal
